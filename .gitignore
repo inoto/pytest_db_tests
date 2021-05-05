@@ -1,0 +1,35 @@
+# Игнорировать байткод
+*.pyc
+*.pyo
+
+**/__pycache__/
+
+# Игнорировать каталог с файлами настройки
+**/config/
+
+# Игнорировать каталог с данными и логами
+**/data/
+**/logs/
+
+# Игнорировать каталог с исполнимыми файлами и модулями (если таковой имеется)
+**/bin/
+
+# Игнорировать html отчеты
+**/report/
+**/assets/
+*.html
+*.css
+
+# Игнорировать конфиг окружения
+.env
+.env.*
+!.env.example
+
+.DS_Store
+
+# Ignore only specific Rider files/directories
+.idea
+
+venv/
+output.txt
+tmp/
