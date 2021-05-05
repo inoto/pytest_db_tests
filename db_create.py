@@ -45,6 +45,9 @@ def show_db(conn):
 
 
 if __name__ == '__main__':
+    if os.path.exists(DB_PATH):
+        os.remove(DB_PATH)
+
     conn = create_connection(DB_PATH)
 
     sql_create_ships_table = """CREATE TABLE Ships (
@@ -55,10 +58,10 @@ if __name__ == '__main__':
                                 );"""
     sql_create_weapons_table = """CREATE TABLE weapons (
                                     weapon TEXT PRIMARY KEY,
-                                    reload speed INTEGER,
-                                    rotational speed INTEGER,
+                                    "reload speed" INTEGER,
+                                    "rotational speed" INTEGER,
                                     diameter INTEGER,
-                                    power volley INTEGER,
+                                    "power volley" INTEGER,
                                     count INTEGER,
                                     FOREIGN KEY (weapon) REFERENCES Ships (weapon)
                                 )"""
