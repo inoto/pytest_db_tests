@@ -4,33 +4,44 @@ import sqlite3
 import pytest
 import pandas as pd
 import definitions
+from scripts.db_helper import DBHelper
 
 
-@pytest.fixture(scope="session")
-def use_db():
-    source = sqlite3.connect(definitions.DB_PATH)
-    yield source
+def db_helper(db_path):
+    source = DBHelper(db_path)
+    yield source.connection
     source.close()
 
 
 @pytest.fixture(scope="session")
-def randomize_some_db_values():
-    # TODO: добавить try except finally
-    source = sqlite3.connect(definitions.DB_PATH)
+def use_source_db():
+    # source = sqlite3.connect(definitions.DB_PATH)
+    source_db = DBHelper(definitions.DB_PATH)
+    print(f'### source DB connected')
+    yield source_db.connection
+    source_db.close()
+    print(f'### source DB close')
+
+
+@pytest.fixture(scope="session")
+def use_randomized_db(use_source_db):
+    print(f'### use_randomized_db connected')
+    source_db = use_source_db
+
     # будем класть копию на диск, будет как доп. лог
     if os.path.exists(definitions.RANDOMIZED_DB_PATH):
         os.remove(definitions.RANDOMIZED_DB_PATH)
-    dest = sqlite3.connect(definitions.RANDOMIZED_DB_PATH)
-    source.backup(dest)
-    source.close()
 
-    randomize_using_sql(dest)
+    randomized_db = DBHelper(definitions.RANDOMIZED_DB_PATH)
+    source_db.backup(randomized_db.connection)
 
-    dest.commit()
-    # dest.close()
+    randomize_using_sql(randomized_db.connection)
 
-    yield dest
-    dest.close()
+    randomized_db.connection.commit()
+
+    yield randomized_db.connection
+    randomized_db.close()
+    print(f'### use_randomized_db close')
 
 
 def randomize_using_sql(dest):
@@ -108,21 +119,19 @@ def randomize_using_pandas(dest):
     df_ships.to_sql('Ships', dest, if_exists='replace')
 
 
-# @pytest.fixture
-# def par_db(request):
-#     yield request.param
-
-
 def pytest_generate_tests(metafunc):
+    print(f'### pytest_generate_tests')
     # ищем только нужную фикстуру
     if 'par_db' in metafunc.fixturenames:
         # читаем базы
-        source_db = sqlite3.connect(definitions.DB_PATH)
-        c = source_db.cursor()
+        # source_db = sqlite3.connect(definitions.DB_PATH)
+        print(f'## pytest_generate_tests source_db connected')
+        source_db = DBHelper(definitions.DB_PATH)
+        c = source_db.connection.cursor()
         c.execute(f'SELECT ship FROM Ships')
         ship_names = c.fetchall()
 
-        # заполняем ключи кораблями
+        # заполняем значения параметризации с названием корабля и его частей
         argvalues = []
         ids = []
         part_names = ['weapon', 'hull', 'engine']
@@ -133,19 +142,12 @@ def pytest_generate_tests(metafunc):
                 argvalues.append((ship_name[0], part_name))
                 ids.append(f'{ship_name[0]}_{part_name}')
 
+        source_db.close()
+        print(f'## pytest_generate_tests source_db close')
+
         if not argvalues:
             raise ValueError("Test cases not loaded")
         # else:
             # print(f'argvalues: {argvalues}')
 
-        # заполняем значения частями корабля
-        # part_names = ['weapon', 'hull', 'engine']
-        # for key in ships:
-        #     for i in range(0, len(part_names)-1):
-        #         cp = source_db.cursor()
-        #         cp.execute(f'SELECT "{part_names[i]}" FROM Ships')
-        #         ships[key][i] =
-
-        # возвращаем список, который будет параметризировать все тесты с command_input аргументом.
-        # ids используется для показа команды в результатах запуска
         return metafunc.parametrize("par_db", argvalues, ids=ids, scope='session')
