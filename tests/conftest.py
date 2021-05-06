@@ -148,4 +148,4 @@ def pytest_generate_tests(metafunc):
 
         # возвращаем список, который будет параметризировать все тесты с command_input аргументом.
         # ids используется для показа команды в результатах запуска
-        return metafunc.parametrize("par_db", argvalues, ids=ids)
+        return metafunc.parametrize("par_db", argvalues, ids=ids, scope='session')
