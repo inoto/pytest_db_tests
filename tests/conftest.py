@@ -29,22 +29,6 @@ def randomize_some_db_values():
     dest.commit()
     # dest.close()
 
-    # c = dest.cursor()
-    # c.execute('SELECT * FROM Ships')
-    # for row in c:
-    #     c.execute('UPDATE Ships SET ')
-    # dest.commit()
-    #
-    # pass
-    # df_ships = pd.read_sql_query('SELECT * FROM Ships', dest)
-    # df_weapons = pd.read_sql_query('SELECT * FROM weapons', dest)
-    # df_hulls = pd.read_sql_query('SELECT * FROM hulls', dest)
-    # df_engines = pd.read_sql_query('SELECT * FROM engines', dest)
-    # parts = [df_weapons, df_hulls, df_engines]
-
-    # dest.commit()
-    # dest.close()
-
     yield dest
     dest.close()
 
@@ -122,3 +106,46 @@ def randomize_using_pandas(dest):
         df_ships.iat[i, rand_field_int] = ref
 
     df_ships.to_sql('Ships', dest, if_exists='replace')
+
+
+# @pytest.fixture
+# def par_db(request):
+#     yield request.param
+
+
+def pytest_generate_tests(metafunc):
+    # ищем только нужную фикстуру
+    if 'par_db' in metafunc.fixturenames:
+        # читаем базы
+        source_db = sqlite3.connect(definitions.DB_PATH)
+        c = source_db.cursor()
+        c.execute(f'SELECT ship FROM Ships')
+        ship_names = c.fetchall()
+
+        # заполняем ключи кораблями
+        argvalues = []
+        ids = []
+        part_names = ['weapon', 'hull', 'engine']
+        for ship_name in ship_names:
+            # print(f'ship: {ship[0]}')
+            # argvalues.append([])
+            for part_name in part_names:
+                argvalues.append((ship_name[0], part_name))
+                ids.append(f'{ship_name[0]}_{part_name}')
+
+        if not argvalues:
+            raise ValueError("Test cases not loaded")
+        # else:
+            # print(f'argvalues: {argvalues}')
+
+        # заполняем значения частями корабля
+        # part_names = ['weapon', 'hull', 'engine']
+        # for key in ships:
+        #     for i in range(0, len(part_names)-1):
+        #         cp = source_db.cursor()
+        #         cp.execute(f'SELECT "{part_names[i]}" FROM Ships')
+        #         ships[key][i] =
+
+        # возвращаем список, который будет параметризировать все тесты с command_input аргументом.
+        # ids используется для показа команды в результатах запуска
+        return metafunc.parametrize("par_db", argvalues, ids=ids)

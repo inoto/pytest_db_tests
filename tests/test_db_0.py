@@ -1,8 +1,7 @@
 import pytest
 
 
-@pytest.mark.parametrize('part_name', ['weapon', 'hull', 'engine'])
-def test_db_0(use_db, randomize_some_db_values, part_name):
+def test_db_0(use_db, randomize_some_db_values, par_db):
     source_db = use_db
     randomized_db = randomize_some_db_values
 
@@ -13,11 +12,11 @@ def test_db_0(use_db, randomize_some_db_values, part_name):
         print(f'ship: {ship[0]}')
         # берём значение из source
         cs = source_db.cursor()
-        cs.execute(f'SELECT "{part_name}" FROM Ships WHERE ship = "{ship[0]}"')
+        cs.execute(f'SELECT "{par_db[1]}" FROM Ships WHERE ship = "{ship[0]}"')
         part_source = cs.fetchall()
         # берём значение из randomized
         cr = randomized_db.cursor()
-        cr.execute(f'SELECT "{part_name}" FROM Ships WHERE ship = "{ship[0]}"')
+        cr.execute(f'SELECT "{par_db[1]}" FROM Ships WHERE ship = "{ship[0]}"')
         part_randomized = cr.fetchall()
 
         print(f'{part_source[0]} -> {part_randomized[0]}')
