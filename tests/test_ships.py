@@ -40,4 +40,5 @@ def test_ships(use_source_db, use_randomized_db, par_db):
     cr.execute(f'SELECT * FROM "{part}s" WHERE "{part}" = "{par_db[2]}"')
     value_randomized = cr.fetchall()
 
-    assert value_source == value_randomized, f'{value_source} -> {value_randomized}'
+    for i in range(1, len(value_source[0])):
+        assert value_source[0][i] == value_randomized[0][i], f'{value_source[0][i]} -> {value_randomized[0][i]}'

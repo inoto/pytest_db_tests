@@ -66,13 +66,13 @@ def randomize_parts_value(randomized_db):
         # для каждой части корабля
         for data_entry in data:
             # print(f'data_entry: {data_entry}')
+            random_component_index = random.randint(1, len(data_entry)-1)
 
-            for index in range(1, len(data_entry)):
-                rand_value = random.randint(1, 20)
-                # print(f'component name: {columns[index][0]}, value: {data_entry[index]}')
-                c_part_read = randomized_db.cursor()
-                query = f'UPDATE "{part_table}" SET "{columns[index][0]}" = "{rand_value}" WHERE "{columns[0][0]}" = "{data_entry[0]}"'
-                # print(f'query: {query}')
-                c_part_read.execute(query)
+            rand_value = random.randint(1, 20)
+            # print(f'component name: {columns[random_component_index][0]}, value: {data_entry[random_component_index]}')
+            c_part_read = randomized_db.cursor()
+            query = f'UPDATE "{part_table}" SET "{columns[random_component_index][0]}" = "{rand_value}" WHERE "{columns[0][0]}" = "{data_entry[0]}"'
+            # print(f'query: {query}')
+            c_part_read.execute(query)
 
     randomized_db.commit()
