@@ -1,23 +1,8 @@
 import logging
 import os
-import sqlite3
 from sqlite3 import Error
-
-DB_PATH = os.path.join(os.path.dirname(__file__), "some.db")
-
-
-def create_connection(db_path):
-    """ create a database connection to the SQLite database specified by db_path
-    :param db_path: a path to database file
-    :return: Connection object or None
-    """
-    conn = None
-    try:
-        conn = sqlite3.connect(db_path)
-    except Error as e:
-        logging.exception(e)
-
-    return conn
+import definitions
+from helpers.db_helper import DBHelper
 
 
 def create_table(conn, create_table_sql):
@@ -33,22 +18,20 @@ def create_table(conn, create_table_sql):
         logging.exception(e)
 
 
-def show_db(conn):
+def show_db_tables(conn):
     try:
         c = conn.cursor()
-
         c.execute('SELECT name from sqlite_master where type= "table"')
         print(c.fetchall())
-
     except Error as e:
         logging.exception(e)
 
 
 if __name__ == '__main__':
-    if os.path.exists(DB_PATH):
-        os.remove(DB_PATH)
+    if os.path.exists(definitions.DB_PATH):
+        os.remove(definitions.DB_PATH)
 
-    conn = create_connection(DB_PATH)
+    conn = DBHelper(definitions.DB_PATH).connection
 
     sql_create_ships_table = """CREATE TABLE Ships (
                                     ship TEXT PRIMARY KEY,
@@ -79,13 +62,10 @@ if __name__ == '__main__':
                                     FOREIGN KEY (engine) REFERENCES Ships (engine)
                                 )"""
 
-    if conn is not None:
-        create_table(conn, sql_create_ships_table)
-        create_table(conn, sql_create_weapons_table)
-        create_table(conn, sql_create_hulls_table)
-        create_table(conn, sql_create_engines_table)
-    else:
-        print("Error! cannot create the database connection.")
+    create_table(conn, sql_create_ships_table)
+    create_table(conn, sql_create_weapons_table)
+    create_table(conn, sql_create_hulls_table)
+    create_table(conn, sql_create_engines_table)
 
-    show_db(conn)
+    show_db_tables(conn)
     conn.close()
