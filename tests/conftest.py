@@ -49,7 +49,7 @@ def pytest_generate_tests(metafunc):
         c = source_db.connection.cursor()
         c.execute(f'SELECT * FROM Ships') # TODO: вынести Ships в константу
         ship_names = c.fetchall()
-        print(f'ship_names: {ship_names}')
+        # print(f'ship_names: {ship_names}')
 
         # c_read_ships = source_db.connection.cursor()
         # c.execute(f'SELECT * FROM Ships')
@@ -59,7 +59,7 @@ def pytest_generate_tests(metafunc):
         part_names = c_read_columns.fetchall()
         part_names = [x for t in part_names for x in t]
         del part_names[0]
-        print(f'part_names: {part_names}')
+        # print(f'part_names: {part_names}')
 
         # заполняем значения параметризации с названием корабля и его частей
         argvalues = []
@@ -72,10 +72,10 @@ def pytest_generate_tests(metafunc):
                 # print(f'part_name: {part_name}')
                 specific_row_index = part_names.index(part_name)
                 argvalues.append((ship_name[0], part_name, ship_name[specific_row_index+1]))
-                ids.append(f'{ship_name[0]}, {ship_name[specific_row_index+1]}')
+                ids.append(f'{ship_name[0]}, {part_name}')
 
         source_db.close()
-        print(f'argvalues: {argvalues}')
+        # print(f'argvalues: {argvalues}')
 
         if not argvalues:
             raise ValueError("Test cases not loaded")

@@ -44,12 +44,12 @@ def test_ships(use_source_db, use_randomized_db, parametrize_ships):
     cs = source_db.cursor()
     cs.execute(f'SELECT * FROM "{part}s" WHERE "{part}" = "{parametrize_ships[2]}"')
     value_source = cs.fetchall()
-    print(f'value_source: {value_source}')
+    # print(f'value_source: {value_source}')
 
     cr = randomized_db.cursor()
     cr.execute(f'SELECT * FROM "{part}s" WHERE "{part}" = "{parametrize_ships[2]}"')
     value_randomized = cr.fetchall()
-    print(f'value_randomized: {value_randomized}')
+    # print(f'value_randomized: {value_randomized}')
 
     for i in range(1, len(value_source[0])):
         # if value_source[0][i] != value_randomized[0][i]:
@@ -59,4 +59,4 @@ def test_ships(use_source_db, use_randomized_db, parametrize_ships):
         except AssertionError as e:
             errors.append(f'{part_table_columns[i - 1]}: expected {value_source[0][i]}, was {value_randomized[0][i]}')
 
-    assert len(errors) == 0, f'{parametrize_ships[0]}, {parametrize_ships[2]} - {errors}'
+    assert len(errors) == 0, f'{parametrize_ships[0]}, {part_randomized} - {errors}'
